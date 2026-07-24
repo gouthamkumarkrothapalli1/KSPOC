@@ -18,6 +18,9 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
+        with:
+          ref: Develop
+          fetch-depth: 0
 
       - name: Install Power Platform CLI
         uses: microsoft/powerplatform-actions/actions-install@v1
@@ -32,36 +35,43 @@ jobs:
 
       - name: Export Unmanaged Solution
         run: |
-         $POWERPLATFORMTOOLS_PACPATH solution export \
+          $POWERPLATFORMTOOLS_PACPATH solution export \
             --name "${{ github.event.inputs.solution_name }}" \
             --path "${{ github.event.inputs.solution_name }}.zip" \
             --managed false
 
       - name: Export Managed Solution
         run: |
-         $POWERPLATFORMTOOLS_PACPATH solution export \
+          $POWERPLATFORMTOOLS_PACPATH solution export \
             --name "${{ github.event.inputs.solution_name }}" \
             --path "${{ github.event.inputs.solution_name }}_managed.zip" \
             --managed true
 
-      - name: Create Folders
+      - name: Create Artifact Folders
         run: |
-          rm -rf Artifacts/Solutions/Managed/${{ github.event.inputs.solution_name }}
-          rm -rf Artifacts/Solutions/Unmanaged/${{ github.event.inputs.solution_name }}
+          mkdir -p artifacts/solutions/unmanaged
+          mkdir -p artifacts/solutions/managed
 
-          mkdir -p Artifacts/Solutions/Managed/${{ github.event.inputs.solution_name }}
-          mkdir -p Artifacts/Solutions/Unmanaged/${{ github.event.inputs.solution_name }}
+      - name: Copy Unmanaged Solution
+        run: |
+          cp "${{ github.event.inputs.solution_name }}.zip" \
+          "artifacts/solutions/unmanaged/${{ github.event.inputs.solution_name }}.zip"
+
+      - name: Copy Managed Solution
+        run: |
+          cp "${{ github.event.inputs.solution_name }}_managed.zip" \
+          "artifacts/solutions/managed/${{ github.event.inputs.solution_name }}.zip"
 
       - name: Commit Changes
         run: |
           git config user.name "github-actions"
           git config user.email "github-actions@github.com"
 
-          git add Artifacts/
+          git add artifacts/
 
           git commit -m "Export ${{ github.event.inputs.solution_name }} managed and unmanaged solutions" || echo "No changes detected"
 
-          git push origin develop
+          git push origin Develop
 
       - name: Clear Authentication
         run: |

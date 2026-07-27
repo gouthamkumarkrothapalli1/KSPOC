@@ -28,10 +28,10 @@ jobs:
       - name: Authenticate to Dataverse
         run: |
           $POWERPLATFORMTOOLS_PACPATH auth create \
-            --applicationId "${{ secrets.POWERPLATFORM_APP_ID }}" \
+            --applicationId "${{ vars.POWERPLATFORM_APP_ID }}" \
             --clientSecret "${{ secrets.POWERPLATFORM_CLIENT_SECRET }}" \
-            --tenant "${{ secrets.POWERPLATFORM_TENANT_ID }}" \
-            --environment "${{ secrets.DEV_ENV_URL }}"
+            --tenant "${{ vars.POWERPLATFORM_TENANT_ID }}" \
+            --environment "${{ vars.DEV_ENV_URL }}"
 
       - name: Export Unmanaged Solution
         run: |
